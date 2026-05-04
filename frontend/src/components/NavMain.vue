@@ -51,7 +51,7 @@ defineProps<{
           :default-open="item.isActive || isSubItemActive(item.items)" class="group/collapsible">
           <SidebarMenuItem>
             <CollapsibleTrigger as-child>
-              <SidebarMenuButton :tooltip="item.title" :is-active="route.path === item.url || isSubItemActive(item.items)"
+              <SidebarMenuButton :tooltip="item.title" :is-active="route.path === item.url"
                 class="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold">
                 <component :is="item.icon" v-if="item.icon" />
                 <span>{{ item.title }}</span>

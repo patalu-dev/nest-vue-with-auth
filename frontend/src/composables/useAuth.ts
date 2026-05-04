@@ -5,7 +5,7 @@ import { toast } from 'vue-sonner'
 import { XCircle } from 'lucide-vue-next'
 import { user, token, lastActivity, isSessionExpired } from './authState'
 
-const INACTIVITY_LIMIT = 1 * 60 * 1000 // 30 minutes
+const INACTIVITY_LIMIT = 30 * 60 * 1000 // 30 minutes
 
 export function useAuth() {
   const setAuth = (newToken: string, newUser: any) => {
