@@ -11,6 +11,9 @@ import { Spinner } from '@/components/ui/spinner'
 import Edit from './components/Edit.vue'
 import Delete from './components/Delete.vue'
 import { Input } from '@/components/ui/input'
+import { useAuth } from '@/composables/useAuth'
+
+const { token } = useAuth()
 
 const { setBreadcrumbs } = useBreadcrumb()
 const router = useRouter()
@@ -60,6 +63,8 @@ let searchTimeout: any = null
 
 // Fetch permissions from backend
 const fetchPermissions = async () => {
+    if (!token.value) return
+
     loading.value = true
     error.value = null
 
