@@ -168,8 +168,9 @@ const handleSubmit = async () => {
 <template>
     <Dialog v-model:open="isOpen">
         <DialogTrigger as-child>
-            <Button class="w-full md:w-auto" @click="isOpen = true">
-                <Plus /> Thêm mới
+            <Button class="gap-2">
+                <Plus class="w-4 h-4" />
+                Thêm mới
             </Button>
         </DialogTrigger>
         <DialogContent class="sm:max-w-[500px]">

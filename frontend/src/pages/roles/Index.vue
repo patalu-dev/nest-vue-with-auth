@@ -139,7 +139,7 @@ onMounted(() => {
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <h1 class="text-xl font-semibold">Quản lý Roles</h1>
             <div class="flex items-center gap-2">
-                <div class="relative w-64">
+                <div class="relative w-full md:w-64">
                     <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input v-model="filters.name" placeholder="Tìm kiếm theo tên..." class="pl-8 h-9 shadow-none" />
                 </div>

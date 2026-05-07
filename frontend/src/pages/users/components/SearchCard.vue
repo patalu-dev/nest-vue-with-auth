@@ -60,7 +60,7 @@ const handleClear = () => {
 <template>
     <Card>
         <CardContent>
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-5">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="flex flex-col gap-2">
                     <Label for="name">Họ tên</Label>
                     <Input id="name" type="text" v-model="filters.name" placeholder="Họ tên" />

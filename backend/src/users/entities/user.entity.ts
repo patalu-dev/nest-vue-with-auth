@@ -53,6 +53,6 @@ export class User {
   deletedAt: Date;
 
   @Exclude()
-  @Column({ length: 255, nullable: true })
-  refreshToken: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  refreshToken: string | null;
 }

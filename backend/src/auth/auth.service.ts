@@ -55,9 +55,9 @@ export class AuthService {
     if (refreshToken) {
       const salt = await bcrypt.genSalt();
       const hash = await bcrypt.hash(refreshToken, salt);
-      await this.usersService.update(userId, { refreshToken: hash });
+      await this.usersService.updateRefreshToken(userId, hash);
     } else {
-      await this.usersService.update(userId, { refreshToken: null });
+      await this.usersService.updateRefreshToken(userId, null);
     }
   }
 

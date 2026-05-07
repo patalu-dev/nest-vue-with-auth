@@ -177,4 +177,8 @@ export class UsersService {
     }
     return { message: 'Khôi phục người dùng thành công' };
   }
+
+  async updateRefreshToken(id: number, refreshToken: string | null) {
+    await this.usersRepository.update(id, { refreshToken });
+  }
 }

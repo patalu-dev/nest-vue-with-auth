@@ -15,7 +15,7 @@ import Restore from './components/Restore.vue'
 import ChangeStatus from './components/ChangeStatus.vue'
 import ChangePassword from './components/ChangePassword.vue'
 import { useAuth } from '@/composables/useAuth'
-import { exportUsers } from './components/exportUtils'
+import { exportUsers } from './lib/exportExcel'
 import Badge from '@/components/ui/badge/Badge.vue'
 
 const { token } = useAuth()
