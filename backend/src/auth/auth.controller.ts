@@ -23,4 +23,29 @@ export class AuthController {
   async changePassword(@Request() req, @Body() body: any) {
     return this.authService.changePassword(req.user.id, body.newPassword);
   }
+
+  @Post('refresh')
+  async refreshTokens(@Body() body: { userId: number; refreshToken: string }) {
+    return this.authService.refreshTokens(body.userId, body.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Request() req) {
+    return this.authService.logout(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('debug')
+  async debugToken(@Request() req) {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = this.authService.decodeToken(token);
+    const now = Math.floor(Date.now() / 1000);
+    return {
+      payload: decoded,
+      serverTime: now,
+      expiresInSeconds: decoded.exp - now,
+      totalLifeTimeSeconds: decoded.exp - decoded.iat
+    };
+  }
 }

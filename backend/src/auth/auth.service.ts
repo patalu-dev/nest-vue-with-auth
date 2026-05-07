@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -25,29 +27,48 @@ export class AuthService {
     return result;
   }
 
-  async login(user: any) {
-    // Extract role IDs to store in JWT (keep token small)
-    const roleIds = user.roles ? user.roles.map((r: any) => r.id) : [];
-
-    // Collect all unique permissions from all roles for frontend use
-    if (user.roles) {
-      for (const role of user.roles) {
-        if (role.permissions) {
-          for (const perm of role.permissions) {
-            // Bao gồm tất cả quyền, cả quyền cho phép và quyền cấm
-          }
-        }
-      }
-    }
-
+  async getTokens(userId: number, username: string, roleIds: number[]) {
     const payload = {
-      username: user.username,
-      sub: user.id,
+      sub: userId,
+      username,
       roles: roleIds,
     };
 
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_SECRET', 'secret_key'),
+        expiresIn: this.configService.get<string>('JWT_EXPIRATION', '15m') as any,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'refresh_secret_key'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION', '7d') as any,
+      }),
+    ]);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  }
+
+  async updateRefreshTokenHash(userId: number, refreshToken: string | null) {
+    if (refreshToken) {
+      const salt = await bcrypt.genSalt();
+      const hash = await bcrypt.hash(refreshToken, salt);
+      await this.usersService.update(userId, { refreshToken: hash });
+    } else {
+      await this.usersService.update(userId, { refreshToken: null });
+    }
+  }
+
+  async login(user: any) {
+    const roleIds = user.roles ? user.roles.map((r: any) => r.id) : [];
+
+    const tokens = await this.getTokens(user.id, user.username, roleIds);
+    await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
+
+    return {
+      ...tokens,
       user: {
         id: user.id,
         username: user.username,
@@ -68,6 +89,47 @@ export class AuthService {
           : [],
       },
     };
+  }
+
+  async refreshTokens(userId: number, refreshToken: string) {
+    try {
+      // 1. Xác thực token (còn hạn hay không, đúng chữ ký không)
+      await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'refresh_secret_key'),
+      });
+    } catch (e) {
+      throw new ForbiddenException('Refresh Token is invalid or expired');
+    }
+
+    const user = await this.usersService.findOne(userId);
+    if (!user || !user.refreshToken) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const refreshTokenMatches = await bcrypt.compare(refreshToken, user.refreshToken);
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    // Lấy lại roles đầy đủ
+    const fullUser = await this.usersService.findByUsername(user.username);
+    if (!fullUser) {
+      throw new ForbiddenException('User not found');
+    }
+    const roleIds = fullUser.roles ? fullUser.roles.map((r: any) => r.id) : [];
+
+    const tokens = await this.getTokens(user.id, user.username, roleIds);
+    await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
+
+  decodeToken(token: string) {
+    return this.jwtService.decode(token) as any;
+  }
+
+  async logout(userId: number) {
+    await this.updateRefreshTokenHash(userId, null);
   }
 
   async changePassword(userId: number, newPassword: string) {

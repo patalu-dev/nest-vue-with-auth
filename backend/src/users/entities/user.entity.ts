@@ -51,4 +51,8 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @Exclude()
+  @Column({ length: 255, nullable: true })
+  refreshToken: string;
 }

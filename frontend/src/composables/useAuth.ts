@@ -3,31 +3,76 @@ import router from '@/router'
 import { API_BASE_URL } from '@/lib/api-config'
 import { toast } from 'vue-sonner'
 import { XCircle } from 'lucide-vue-next'
-import { user, token, lastActivity, isSessionExpired } from './authState'
+import { user, token, refreshToken, lastActivity, isSessionExpired } from './authState'
 
 const INACTIVITY_LIMIT = 30 * 60 * 1000 // 30 minutes
 
 export function useAuth() {
-  const setAuth = (newToken: string, newUser: any) => {
+  const setAuth = (newToken: string, newRefreshToken: string, newUser: any) => {
     token.value = newToken
+    refreshToken.value = newRefreshToken
     user.value = newUser
     isSessionExpired.value = false // Reset expiry state on new login
     localStorage.setItem('token', newToken)
+    if (newRefreshToken) {
+      localStorage.setItem('refreshToken', newRefreshToken)
+    }
     localStorage.setItem('user', JSON.stringify(newUser))
     resetInactivityTimer()
   }
 
   const clearAuth = () => {
-    const currentRoute = router.currentRoute.value
     token.value = null
+    refreshToken.value = null
     user.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     localStorage.removeItem('lastActivity')
     
-    console.log('Logging out, current path:', currentRoute.fullPath)
-    
     router.push({ name: 'login' })
+  }
+
+  let refreshPromise: Promise<boolean> | null = null
+
+  const refreshAuthToken = async (): Promise<boolean> => {
+    if (!refreshToken.value || !user.value) {
+      clearAuth()
+      return false
+    }
+
+    // Nếu đang có một request refresh khác đang chạy thì chờ nó xong
+    if (refreshPromise) {
+      return refreshPromise
+    }
+
+    refreshPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId: user.value.id, 
+            refreshToken: refreshToken.value 
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Refresh token invalid')
+        }
+
+        const data = await response.json()
+        setAuth(data.access_token, data.refresh_token, user.value)
+        return true
+      } catch (err) {
+        clearAuth()
+        return false
+      } finally {
+        refreshPromise = null
+      }
+    })()
+
+    return refreshPromise
   }
 
   const login = async (username: string, password: string, redirectPath?: string) => {
@@ -44,7 +89,7 @@ export function useAuth() {
         throw new Error(data.message || 'Đăng nhập thất bại')
       }
 
-      setAuth(data.access_token, data.user)
+      setAuth(data.access_token, data.refresh_token, data.user)
 
       // Xử lý chuyển hướng sau khi đăng nhập thành công
       let target = redirectPath || (router.currentRoute.value.query.redirect as string) || '/dashboard'
@@ -67,7 +112,20 @@ export function useAuth() {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    if (token.value) {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.value}`
+          },
+        })
+      } catch (e) {
+        console.error('Logout failed:', e)
+      }
+    }
     clearAuth()
   }
 
@@ -152,6 +210,7 @@ export function useAuth() {
     token,
     login,
     logout,
+    refreshAuthToken,
     can,
     checkInactivity,
     resetInactivityTimer,

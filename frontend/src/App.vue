@@ -29,7 +29,7 @@ import { ShieldAlert } from 'lucide-vue-next';
 import 'vue-sonner/style.css';
 
 import { useRoute } from 'vue-router'
-import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 
 const { items: breadcrumbItems } = useBreadcrumb();
@@ -42,16 +42,6 @@ const hasPermission = computed(() => {
   if (!route.meta.action || !route.meta.subject) return true
   return can(route.meta.action as string, route.meta.subject as string)
 })
-
-// Debugging logs
-watch([token, () => route.path], ([newToken, newPath]: [string | null, string]) => {
-  console.log('Auth State Change:', {
-    hasToken: !!newToken,
-    path: newPath,
-    routeName: route.name,
-    requiresAuth: route.meta.requiresAuth
-  })
-}, { immediate: true })
 
 const handleSessionExpired = () => {
   isSessionExpired.value = false
