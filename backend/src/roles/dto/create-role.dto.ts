@@ -1,11 +1,24 @@
-import { IsString, IsOptional, IsBoolean, IsArray, IsNumber, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  IsNumber,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateRoleDto {
-  @IsString()
-  @MaxLength(50)
+  @IsString({
+    message: 'Tên vai trò phải là một chuỗi ký tự',
+  })
+  @MaxLength(50, {
+    message: 'Tên vai trò phải có độ dài tối đa 50 ký tự',
+  })
   name: string;
 
-  @IsString()
+  @IsString({
+    message: 'Mô tả phải là một chuỗi ký tự',
+  })
   @IsOptional()
   @MaxLength(255)
   description?: string;

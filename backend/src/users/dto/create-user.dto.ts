@@ -1,19 +1,31 @@
 import { IsString, IsEmail, IsBoolean, MaxLength, IsOptional, IsNumber, IsArray } from 'class-validator';
 
 export class CreateUserDto {
-    @IsString()
-    @MaxLength(100)
+    @IsString({
+        message: 'Họ tên phải là một chuỗi ký tự'
+    })
+    @MaxLength(100, {
+        message: 'Họ tên phải có độ dài tối đa 100 ký tự'
+    })
     name: string;
 
-    @IsString()
-    @MaxLength(50)
+    @IsString({
+        message: 'Tên đăng nhập phải là một chuỗi ký tự'
+    })
+    @MaxLength(50, {
+        message: 'Tên đăng nhập phải có độ dài tối đa 50 ký tự'
+    })
     username: string;
 
-    @IsEmail()
+    @IsEmail({}, {
+        message: 'Email không hợp lệ'
+    })
     @IsOptional()
     email?: string;
 
-    @IsString()
+    @IsString({
+        message: 'Mật khẩu phải là một chuỗi ký tự'
+    })
     @IsOptional()
     password?: string;
 
