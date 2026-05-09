@@ -28,7 +28,7 @@ const goHome = () => {
 
 <style scoped>
 .not-found-container {
-  height: 100vh;
+  height: 90vh;
   width: 100%;
   display: flex;
   align-items: center;
