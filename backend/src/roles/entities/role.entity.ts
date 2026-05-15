@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   ManyToMany,
   JoinTable,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { Permission } from '../../permissions/entities/permission.entity';
 
@@ -31,9 +33,20 @@ export class Role {
   })
   permissions: Permission[];
 
-  @CreateDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   updatedAt: Date;
+
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
+
+  @BeforeUpdate()
+  setUpdatedAt() {
+    this.updatedAt = new Date();
+  }
 }

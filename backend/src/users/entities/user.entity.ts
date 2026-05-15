@@ -8,6 +8,8 @@ import {
   Unique,
   ManyToMany,
   JoinTable,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
@@ -43,16 +45,27 @@ export class User {
   })
   roles: Role[];
 
-  @CreateDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   deletedAt: Date;
 
   @Exclude()
   @Column({ type: 'varchar', length: 255, nullable: true })
   refreshToken: string | null;
+
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
+
+  @BeforeUpdate()
+  setUpdatedAt() {
+    this.updatedAt = new Date();
+  }
 }

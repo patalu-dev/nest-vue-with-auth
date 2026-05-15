@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 
 @Entity('permissions')
@@ -34,9 +36,20 @@ export class Permission {
   @Column({ type: 'text', nullable: true })
   conditions: string;
 
-  @CreateDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: 'datetime', nullable: true })
   updatedAt: Date;
+
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
+  
+  @BeforeUpdate()
+    setUpdatedAt() {
+      this.updatedAt = new Date();
+    }
 }

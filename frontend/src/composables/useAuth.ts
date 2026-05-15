@@ -136,9 +136,13 @@ export function useAuth() {
     localStorage.setItem('lastActivity', String(now))
   }
 
-  const checkInactivity = () => {
+  const checkInactivity = (silent = false) => {
     if (token.value && Date.now() - lastActivity.value > INACTIVITY_LIMIT) {
-      isSessionExpired.value = true
+      if (silent) {
+        clearAuth()
+      } else {
+        isSessionExpired.value = true
+      }
     }
   }
 

@@ -51,8 +51,8 @@ const handleSessionExpired = () => {
 let interval: any = null
 
 onMounted(() => {
-  // Check inactivity immediately on mount
-  checkInactivity()
+  // Check inactivity immediately on mount - silent check to avoid illogical alerts on fresh access
+  checkInactivity(true)
 
   // Check inactivity every minute
   interval = setInterval(checkInactivity, 60 * 1000)
