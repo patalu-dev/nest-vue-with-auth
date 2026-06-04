@@ -19,6 +19,7 @@ import {
 
 import { useRoute } from 'vue-router'
 import { useSidebar } from '@/components/ui/sidebar'
+import { ref, watch } from 'vue'
 
 const route = useRoute()
 const { setOpenMobile } = useSidebar()
@@ -27,7 +28,7 @@ const isSubItemActive = (subItems?: { url: string }[]) => {
   return subItems?.some(subItem => subItem.url === route.path)
 }
 
-defineProps<{
+const props = defineProps<{
   items: {
     title: string
     url: string
@@ -39,6 +40,28 @@ defineProps<{
     }[]
   }[]
 }>()
+
+// Provide reactive open state for collapsibles based on current route
+const openStates = ref<Record<string, boolean>>({})
+
+// Initialize open states
+props.items.forEach(item => {
+  if (item.items && item.items.length > 0) {
+    openStates.value[item.title] = item.isActive || isSubItemActive(item.items) || false
+  }
+})
+
+// Watch route changes to automatically open parent groups if a child becomes active
+watch(() => route.path, () => {
+  props.items.forEach(item => {
+    if (item.items && item.items.length > 0) {
+      if (isSubItemActive(item.items)) {
+        openStates.value[item.title] = true
+      }
+    }
+  })
+})
+
 </script>
 
 <template>
@@ -47,11 +70,11 @@ defineProps<{
     <SidebarMenu>
       <template v-for="item in items" :key="item.title">
         <!-- Nếu có menu con -->
-        <Collapsible v-if="item.items && item.items.length > 0" as-child
-          :default-open="item.isActive || isSubItemActive(item.items)" class="group/collapsible">
+        <Collapsible v-if="item.items && item.items.length > 0" as-child v-model:open="openStates[item.title]"
+          class="group/collapsible">
           <SidebarMenuItem>
             <CollapsibleTrigger as-child>
-              <SidebarMenuButton :tooltip="item.title" :is-active="route.path === item.url"
+              <SidebarMenuButton :tooltip="item.title"
                 class="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold">
                 <component :is="item.icon" v-if="item.icon" />
                 <span>{{ item.title }}</span>
@@ -76,7 +99,7 @@ defineProps<{
 
         <!-- Nếu KHÔNG có menu con (Link trực tiếp) -->
         <SidebarMenuItem v-else>
-          <SidebarMenuButton as-child :tooltip="item.title" :is-active="route.path === item.url"
+          <SidebarMenuButton as-child :tooltip="item.title" :is-active="item.isActive || route.path === item.url"
             class="data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-semibold">
             <RouterLink :to="item.url" @click="setOpenMobile(false)">
               <component :is="item.icon" v-if="item.icon" />

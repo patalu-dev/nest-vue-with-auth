@@ -2,16 +2,14 @@ import { useAuth } from '@/composables/useAuth'
 import { API_BASE_URL } from './api-config'
 
 export async function request(path: string, options: RequestInit = {}) {
-  const { token, logout, refreshAuthToken, resetInactivityTimer } = useAuth()
+  const { logout, refreshAuthToken, resetInactivityTimer } = useAuth()
   
   const headers = new Headers(options.headers || {})
-  if (token.value) {
-    headers.set('Authorization', `Bearer ${token.value}`)
-  }
   
   let response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers
+    headers,
+    credentials: 'include', // Important: include cookies for all requests
   })
 
   // Reset timer on active response
@@ -23,15 +21,11 @@ export async function request(path: string, options: RequestInit = {}) {
     const refreshed = await refreshAuthToken()
     
     if (refreshed) {
-      // Retry the original request with the new token
-      const retryHeaders = new Headers(options.headers || {})
-      if (token.value) {
-        retryHeaders.set('Authorization', `Bearer ${token.value}`)
-      }
-      
+      // Retry the original request (cookies are automatically included)
       response = await fetch(`${API_BASE_URL}${path}`, {
         ...options,
-        headers: retryHeaders
+        headers,
+        credentials: 'include',
       })
       
       if (response.ok) {

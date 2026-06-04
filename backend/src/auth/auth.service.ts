@@ -34,13 +34,23 @@ export class AuthService {
       roles: roleIds,
     };
 
+    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+    const jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    if (!jwtRefreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET environment variable is required');
+    }
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_SECRET', 'secret_key'),
+        secret: jwtSecret,
         expiresIn: this.configService.get<string>('JWT_EXPIRATION', '15m') as any,
       }),
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'refresh_secret_key'),
+        secret: jwtRefreshSecret,
         expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION', '7d') as any,
       }),
     ]);
@@ -92,10 +102,15 @@ export class AuthService {
   }
 
   async refreshTokens(userId: number, refreshToken: string) {
+    const jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    if (!jwtRefreshSecret) {
+      throw new Error('JWT_REFRESH_SECRET environment variable is required');
+    }
+
     try {
       // 1. Xác thực token (còn hạn hay không, đúng chữ ký không)
       await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'refresh_secret_key'),
+        secret: jwtRefreshSecret,
       });
     } catch (e) {
       throw new ForbiddenException('Refresh Token is invalid or expired');

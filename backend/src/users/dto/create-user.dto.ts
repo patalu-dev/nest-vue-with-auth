@@ -1,4 +1,6 @@
 import { IsString, IsEmail, IsBoolean, MaxLength, IsOptional, IsNumber, IsArray } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { sanitizeInput } from '../../utils/sanitize';
 
 export class CreateUserDto {
     @IsString({
@@ -7,6 +9,7 @@ export class CreateUserDto {
     @MaxLength(100, {
         message: 'Họ tên phải có độ dài tối đa 100 ký tự'
     })
+    @Transform(({ value }) => sanitizeInput(value))
     name: string;
 
     @IsString({
@@ -15,12 +18,14 @@ export class CreateUserDto {
     @MaxLength(50, {
         message: 'Tên đăng nhập phải có độ dài tối đa 50 ký tự'
     })
+    @Transform(({ value }) => sanitizeInput(value))
     username: string;
 
     @IsEmail({}, {
         message: 'Email không hợp lệ'
     })
     @IsOptional()
+    @Transform(({ value }) => value ? sanitizeInput(value) : value)
     email?: string;
 
     @IsString({

@@ -11,7 +11,7 @@ export const exportUsers = async (
     showDeleted: boolean = false
 ) => {
     const toastId = toast.loading('Đang chuẩn bị dữ liệu xuất...', { position: 'top-center' })
-    
+
     try {
         // Lấy toàn bộ dữ liệu theo bộ lọc (giới hạn lớn)
         const queryParams = new URLSearchParams()
@@ -21,13 +21,13 @@ export const exportUsers = async (
         if (filters.role && filters.role.length > 0) queryParams.append('role', filters.role.join(','))
         if (filters.status) queryParams.append('status', filters.status)
         if (showDeleted) queryParams.append('showDeleted', 'true')
-        
+
         queryParams.append('page', '1')
         queryParams.append('limit', '5000') // Xuất tối đa 5000 bản ghi
 
         const response = await request(`/users?${queryParams.toString()}`)
         if (!response.ok) throw new Error('Không thể lấy dữ liệu xuất')
-        
+
         const result = await response.json()
         const dataToExport = result.items || []
 
@@ -44,7 +44,7 @@ export const exportUsers = async (
             ...dataToExport.map((item: any, index: number) => {
                 const roles = item.roles?.map((r: any) => r.name).join(', ') || '---'
                 const status = showDeleted ? 'Đã xóa' : (item.isActive ? 'Hoạt động' : 'Không hoạt động')
-                
+
                 return [
                     index + 1,
                     `"${(item.name || '').replace(/"/g, '""')}"`,
@@ -63,14 +63,14 @@ export const exportUsers = async (
         const link = document.createElement('a')
         const url = URL.createObjectURL(blob)
         const dateStr = new Date().toISOString().split('T')[0]
-        
+
         link.setAttribute('href', url)
         link.setAttribute('download', `Danh-sach-nguoi-dung-${dateStr}.csv`)
         link.style.visibility = 'hidden'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
+
         toast.success('Xuất file thành công', { id: toastId })
     } catch (err: any) {
         toast.error('Lỗi khi xuất file: ' + err.message, { id: toastId })

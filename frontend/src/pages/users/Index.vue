@@ -18,7 +18,7 @@ import { useAuth } from '@/composables/useAuth'
 import { exportUsers } from './lib/exportExcel'
 import Badge from '@/components/ui/badge/Badge.vue'
 
-const { token } = useAuth()
+const { user } = useAuth()
 const { setBreadcrumbs } = useBreadcrumb()
 const router = useRouter()
 const route = useRoute()
@@ -72,8 +72,8 @@ const error = ref<string | null>(null)
 
 // Fetch users from backend
 const fetchUsers = async () => {
-    // Nếu đang trong quá trình đăng xuất (token bị xóa), không gọi API
-    if (!token.value) return
+    // Nếu đang trong quá trình đăng xuất (user bị xóa), không gọi API
+    if (!user.value) return
 
     loading.value = true
     error.value = null
@@ -195,10 +195,10 @@ const handleExport = async () => {
             <Create @success="fetchUsers" />
         </div>
         <SearchCard :initial-filters="filters" :loading="loading" @search="handleSearch" />
-        <div class="overflow-x-auto border border-gray-200 rounded-sm mt-2">
+        <div class="overflow-x-auto border border-gray-200 rounded-sm mt-2 shadow-sm bg-white">
             <div class="w-full overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
-                    <thead class="bg-gray-100 text-gray-700 h-8">
+                    <thead class="text-gray-700 h-8">
                         <tr>
                             <th class="px-4 py-1 border-b whitespace-nowrap w-12 text-center">STT</th>
                             <th class="px-4 py-1 border-b whitespace-nowrap">Họ tên</th>

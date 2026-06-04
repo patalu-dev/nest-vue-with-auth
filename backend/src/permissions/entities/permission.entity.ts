@@ -33,8 +33,8 @@ export class Permission {
   inverted: boolean;
 
   /** JSON conditions for field-level or conditional permissions */
-  @Column({ type: 'text', nullable: true })
-  conditions: string;
+  @Column({ type: 'json', nullable: true })
+  conditions: Record<string, any>;
 
   @Column({ type: 'datetime', nullable: true })
   createdAt: Date;

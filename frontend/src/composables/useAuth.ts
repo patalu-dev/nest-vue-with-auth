@@ -8,15 +8,9 @@ import { user, token, refreshToken, lastActivity, isSessionExpired } from './aut
 const INACTIVITY_LIMIT = 30 * 60 * 1000 // 30 minutes
 
 export function useAuth() {
-  const setAuth = (newToken: string, newRefreshToken: string, newUser: any) => {
-    token.value = newToken
-    refreshToken.value = newRefreshToken
+  const setAuth = (newUser: any) => {
     user.value = newUser
     isSessionExpired.value = false // Reset expiry state on new login
-    localStorage.setItem('token', newToken)
-    if (newRefreshToken) {
-      localStorage.setItem('refreshToken', newRefreshToken)
-    }
     localStorage.setItem('user', JSON.stringify(newUser))
     resetInactivityTimer()
   }
@@ -25,8 +19,6 @@ export function useAuth() {
     token.value = null
     refreshToken.value = null
     user.value = null
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     localStorage.removeItem('lastActivity')
     
@@ -36,7 +28,7 @@ export function useAuth() {
   let refreshPromise: Promise<boolean> | null = null
 
   const refreshAuthToken = async (): Promise<boolean> => {
-    if (!refreshToken.value || !user.value) {
+    if (!user.value) {
       clearAuth()
       return false
     }
@@ -52,17 +44,16 @@ export function useAuth() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            userId: user.value.id, 
-            refreshToken: refreshToken.value 
+            userId: user.value.id
           }),
+          credentials: 'include', // Important: include cookies
         })
 
         if (!response.ok) {
           throw new Error('Refresh token invalid')
         }
 
-        const data = await response.json()
-        setAuth(data.access_token, data.refresh_token, user.value)
+        // Cookies are automatically updated by the server
         return true
       } catch (err) {
         clearAuth()
@@ -81,6 +72,7 @@ export function useAuth() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
+        credentials: 'include', // Important: include cookies
       })
 
       const data = await response.json()
@@ -89,7 +81,7 @@ export function useAuth() {
         throw new Error(data.message || 'Đăng nhập thất bại')
       }
 
-      setAuth(data.access_token, data.refresh_token, data.user)
+      setAuth(data.user)
 
       // Xử lý chuyển hướng sau khi đăng nhập thành công
       let target = redirectPath || (router.currentRoute.value.query.redirect as string) || '/dashboard'
@@ -113,14 +105,14 @@ export function useAuth() {
   }
 
   const logout = async () => {
-    if (token.value) {
+    if (user.value) {
       try {
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.value}`
           },
+          credentials: 'include', // Important: include cookies
         })
       } catch (e) {
         console.error('Logout failed:', e)
@@ -137,7 +129,7 @@ export function useAuth() {
   }
 
   const checkInactivity = (silent = false) => {
-    if (token.value && Date.now() - lastActivity.value > INACTIVITY_LIMIT) {
+    if (user.value && Date.now() - lastActivity.value > INACTIVITY_LIMIT) {
       if (silent) {
         clearAuth()
       } else {
@@ -154,11 +146,20 @@ export function useAuth() {
       const checkConditions = (conditions: any, data: any) => {
         if (!conditions) return true
         if (!data) return false
-        
+
         try {
-          const condObj = typeof conditions === 'string' ? JSON.parse(conditions) : conditions
+          const rawCond = typeof conditions === 'string'
+            ? conditions
+            : JSON.stringify(conditions);
+
+          let resolvedStr = rawCond.replace(/"\$\{user\.id\}"/g, JSON.stringify(String(user.value.id)));
+          resolvedStr = resolvedStr.replace(/"\$\{user\.username\}"/g, JSON.stringify(user.value.username));
+          resolvedStr = resolvedStr.replace(/\$\{user\.id\}/g, String(user.value.id));
+          resolvedStr = resolvedStr.replace(/\$\{user\.username\}/g, String(user.value.username));
+
+          const condObj = JSON.parse(resolvedStr);
           for (const key in condObj) {
-            if (data[key] !== condObj[key]) return false
+            if (String(data[key]) !== String(condObj[key])) return false
           }
           return true
         } catch (e) {
@@ -219,24 +220,6 @@ export function useAuth() {
     checkInactivity,
     resetInactivityTimer,
     isSessionExpired,
-    isAuthenticated: computed(() => !!token.value)
+    isAuthenticated: computed(() => !!user.value) // Changed to check user instead of token
   }
 }
-
-// Sync across tabs
-window.addEventListener('storage', (event) => {
-  if (event.key === 'token') {
-    token.value = event.newValue
-  }
-  if (event.key === 'user') {
-    if (event.newValue) {
-      try {
-        user.value = JSON.parse(event.newValue)
-      } catch (e) {
-        user.value = null
-      }
-    } else {
-      user.value = null
-    }
-  }
-})

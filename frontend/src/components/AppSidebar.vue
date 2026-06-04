@@ -42,19 +42,20 @@ const data = computed(() => {
 
   const navMain = []
 
-  // Always show Dashboard
   navMain.push({
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
   })
 
+  // if (can('view', 'Dashboard')) {
+  // }
+
   if (adminItems.length > 0) {
     navMain.push({
       title: "Administrator",
-      url: "#",
+      url: "",
       icon: SquareTerminal,
-      isActive: true,
       items: adminItems,
     })
   }

@@ -34,11 +34,11 @@ import { useAuth } from '@/composables/useAuth'
 
 const { items: breadcrumbItems } = useBreadcrumb();
 const route = useRoute()
-const { token, resetInactivityTimer, checkInactivity, isSessionExpired, logout, can } = useAuth()
+const { user, resetInactivityTimer, checkInactivity, isSessionExpired, logout, can } = useAuth()
 
 const hasPermission = computed(() => {
   if (!route.meta.requiresAuth) return true
-  if (!token.value) return false
+  if (!user.value) return false
   if (!route.meta.action || !route.meta.subject) return true
   return can(route.meta.action as string, route.meta.subject as string)
 })
@@ -71,10 +71,10 @@ onUnmounted(() => {
 })
 
 const isAuthPage = computed(() => {
-  // If no token, we must be on auth page
-  if (!token.value) return true
+  // If no user, we must be on auth page
+  if (!user.value) return true
 
-  // Even with token, if we are explicitly on the login route or home, it's an auth page
+  // Even with user, if we are explicitly on the login route or home, it's an auth page
   // (though the router should redirect us away)
   return route.name === 'login' || route.path === '/'
 })
@@ -120,7 +120,7 @@ const isAuthPage = computed(() => {
       </header>
       <hr class="border-border" />
 
-      <main class="flex-1 flex flex-col overflow-hidden">
+      <main class="flex-1 flex flex-col overflow-hidden bg-gray-100">
         <template v-if="hasPermission">
           <RouterView :key="route.path" />
         </template>

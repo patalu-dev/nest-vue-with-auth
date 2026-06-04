@@ -13,7 +13,7 @@ import Delete from './components/Delete.vue'
 import SyncPermission from './components/SyncPermission.vue'
 import { useAuth } from '@/composables/useAuth'
 
-const { token } = useAuth()
+const { user } = useAuth()
 
 const { setBreadcrumbs } = useBreadcrumb()
 const router = useRouter()
@@ -63,7 +63,7 @@ let searchTimeout: any = null
 
 // Fetch roles from backend
 const fetchRoles = async () => {
-    if (!token.value) return
+    if (!user.value) return
 
     loading.value = true
     error.value = null
@@ -141,15 +141,16 @@ onMounted(() => {
             <div class="flex items-center gap-2">
                 <div class="relative w-full md:w-64">
                     <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input v-model="filters.name" placeholder="Tìm kiếm theo tên..." class="pl-8 h-9 shadow-none" />
+                    <Input v-model="filters.name" placeholder="Tìm kiếm theo tên..."
+                        class="pl-8 h-9 shadow-none bg-white" />
                 </div>
                 <Create @success="fetchRoles" />
             </div>
         </div>
-        <div class="overflow-x-auto border border-gray-200 rounded-sm">
+        <div class="overflow-x-auto border border-gray-200 rounded-sm shadow-sm bg-white">
             <div class="w-full overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
-                    <thead class="bg-gray-50 text-gray-700 font-medium h-8">
+                    <thead class="text-gray-700 font-medium h-8">
                         <tr>
                             <th class="px-4 py-1 border-b whitespace-nowrap w-12 text-center">STT</th>
                             <th class="px-4 py-1 border-b whitespace-nowrap">Name</th>

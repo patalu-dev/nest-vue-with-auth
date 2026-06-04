@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { User } from './users/entities/user.entity';
 import { Role } from './roles/entities/role.entity';
 import { Permission } from './permissions/entities/permission.entity';
@@ -17,21 +18,37 @@ import { AbilityModule } from './ability/ability.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // 1 minute
+      limit: 100, // 100 requests per minute
+    }]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 3306),
-        username: configService.get<string>('DB_USERNAME', 'root'),
-        password: configService.get<string>('DB_PASSWORD', ''),
-        database: configService.get<string>('DB_DATABASE', 'test'),
-        entities: [User, Role, Permission],
-        synchronize: false,
-        migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-        migrationsRun: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbHost = configService.get<string>('DB_HOST');
+        const dbPort = configService.get<number>('DB_PORT');
+        const dbUsername = configService.get<string>('DB_USERNAME');
+        const dbPassword = configService.get<string>('DB_PASSWORD');
+        const dbDatabase = configService.get<string>('DB_DATABASE');
+
+        if (!dbHost || !dbPort || !dbUsername || !dbPassword || !dbDatabase) {
+          throw new Error('Database environment variables (DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE) are required');
+        }
+
+        return {
+          type: 'mysql',
+          host: dbHost,
+          port: dbPort,
+          username: dbUsername,
+          password: dbPassword,
+          database: dbDatabase,
+          entities: [User, Role, Permission],
+          synchronize: false,
+          migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+          migrationsRun: true,
+        };
+      },
     }),
     AbilityModule,
     AuthModule,

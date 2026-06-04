@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, MaxLength, IsObject } from 'class-validator';
 
 export class CreatePermissionDto {
   @IsString(
@@ -40,11 +40,11 @@ export class CreatePermissionDto {
   })
   description?: string;
 
+  @IsOptional()
+  @IsObject()
+  conditions?: Record<string, any>;
+
   @IsBoolean()
   @IsOptional()
   inverted?: boolean;
-
-  @IsString()
-  @IsOptional()
-  conditions?: string;
 }

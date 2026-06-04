@@ -36,24 +36,24 @@ async function seed() {
 
   const defaultPermissions = [
     { name: 'Toàn quyền', action: 'manage', subject: 'all', description: 'Toàn quyền quản lý hệ thống', inverted: false },
+    { name: 'Xem tất cả', action: 'read', subject: 'all', description: 'Xem tất cả thông tin', inverted: false },
+    { name: 'Xem menu người dùng', action: 'view', subject: 'User', description: 'Xem menu User', inverted: false },
     { name: 'Tạo người dùng', action: 'create', subject: 'User', description: 'Tạo người dùng mới', inverted: false },
     { name: 'Xem người dùng', action: 'read', subject: 'User', description: 'Xem thông tin người dùng', inverted: false },
     { name: 'Sửa người dùng', action: 'update', subject: 'User', description: 'Cập nhật thông tin người dùng', inverted: false },
     { name: 'Xóa người dùng', action: 'delete', subject: 'User', description: 'Xóa người dùng', inverted: false },
+    { name: 'Xem menu vai trò', action: 'view', subject: 'Role', description: 'Xem menu Role', inverted: false },
     { name: 'Tạo vai trò', action: 'create', subject: 'Role', description: 'Tạo vai trò mới', inverted: false },
     { name: 'Xem vai trò', action: 'read', subject: 'Role', description: 'Xem thông tin vai trò', inverted: false },
     { name: 'Sửa vai trò', action: 'update', subject: 'Role', description: 'Cập nhật vai trò', inverted: false },
     { name: 'Xóa vai trò', action: 'delete', subject: 'Role', description: 'Xóa vai trò', inverted: false },
+    { name: 'Xem menu quyền', action: 'view', subject: 'Permission', description: 'Xem menu Permission', inverted: false },
     { name: 'Tạo quyền', action: 'create', subject: 'Permission', description: 'Tạo quyền mới', inverted: false },
     { name: 'Xem quyền', action: 'read', subject: 'Permission', description: 'Xem thông tin quyền', inverted: false },
     { name: 'Sửa quyền', action: 'update', subject: 'Permission', description: 'Cập nhật quyền', inverted: false },
     { name: 'Xóa quyền', action: 'delete', subject: 'Permission', description: 'Xóa quyền', inverted: false },
-    { name: 'Xem tất cả', action: 'read', subject: 'all', description: 'Xem tất cả thông tin', inverted: false },
     { name: 'Ngăn truy cập Roles', action: 'create,update,delete,view', subject: 'Role', description: 'Ngăn truy cập Roles', inverted: true },
     { name: 'Ngăn truy cập Permissions', action: 'create,update,view,delete', subject: 'Permission', description: 'Ngăn truy cập Permissions', inverted: true },
-    { name: 'Xem menu User', action: 'view', subject: 'User', description: 'Xem menu User', inverted: false },
-    { name: 'Xem menu Role', action: 'view', subject: 'Role', description: 'Xem menu Role', inverted: false },
-    { name: 'Xem menu Permission', action: 'view', subject: 'Permission', description: 'Xem menu Permission', inverted: false },
   ];
 
   const savedPermissions: Permission[] = [];
@@ -118,8 +118,8 @@ async function seed() {
   console.log('\n━━━ BƯỚC 3: Cập nhật Users ━━━');
 
   const usersData = [
-    { name: 'Administrator', username: 'admin', roles: ['admin'] },
     { name: 'Super Administrator', username: 'super_admin', roles: ['super_admin'] },
+    { name: 'Administrator', username: 'admin', roles: ['admin'] },
     { name: 'User', username: 'user', roles: ['user'] },
   ];
 

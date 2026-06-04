@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { token } from '@/composables/authState'
+import { user } from '@/composables/authState'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -44,11 +44,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from) => {
-  if (to.meta.requiresAuth && !token.value) {
+  if (to.meta.requiresAuth && !user.value) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.name === 'login' && token.value) {
+  if (to.name === 'login' && user.value) {
     return { name: 'dashboard' }
   }
 })
