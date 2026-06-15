@@ -44,9 +44,7 @@ import { AbilityModule } from './ability/ability.module';
           password: dbPassword,
           database: dbDatabase,
           entities: [User, Role, Permission],
-          synchronize: false,
-          migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-          migrationsRun: true,
+          synchronize: true,
         };
       },
     }),

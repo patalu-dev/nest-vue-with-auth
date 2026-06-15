@@ -74,7 +74,7 @@ const goHome = () => {
 }
 
 .error-code {
-  font-size: 10rem;
+  font-size: 8rem;
   font-weight: 900;
   margin: 0;
   line-height: 1;
@@ -95,7 +95,7 @@ const goHome = () => {
 }
 
 .error-message {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
   color: #1d1d1d;

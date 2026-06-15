@@ -4,7 +4,6 @@ import { useBreadcrumb } from '@/composables/useBreadcrumb'
 import { Button } from '@/components/ui/button'
 import { Save, CheckCircle, XCircle } from 'lucide-vue-next'
 import { request } from '@/lib/api'
-import { useRouter } from 'vue-router'
 import { Spinner } from '@/components/ui/spinner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,7 +11,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { toast } from 'vue-sonner'
 
 const { setBreadcrumbs } = useBreadcrumb()
-const router = useRouter()
 
 setBreadcrumbs([
     { title: 'Thay đổi mật khẩu' },
@@ -20,10 +18,20 @@ setBreadcrumbs([
 
 // State
 const loading = ref(false)
+const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 
 const submit = async () => {
+    if (!currentPassword.value) {
+        toast('Lỗi', {
+            description: 'Vui lòng nhập mật khẩu hiện tại',
+            icon: h(XCircle, { class: 'text-red-500 w-5 h-5' }),
+            position: 'top-center'
+        })
+        return
+    }
+
     if (!newPassword.value) {
         toast('Lỗi', {
             description: 'Vui lòng nhập mật khẩu mới',
@@ -47,7 +55,10 @@ const submit = async () => {
         const response = await request('/auth/change-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ newPassword: newPassword.value }),
+            body: JSON.stringify({
+                currentPassword: currentPassword.value,
+                newPassword: newPassword.value,
+            }),
         })
 
         if (!response.ok) {
@@ -61,8 +72,9 @@ const submit = async () => {
             position: 'top-center'
         })
 
-        // Quay lại trang dashboard
-        router.push('/dashboard')
+        currentPassword.value = ''
+        newPassword.value = ''
+        confirmPassword.value = ''
     } catch (err: any) {
         toast('Lỗi', {
             description: err.message,
@@ -87,6 +99,11 @@ const submit = async () => {
                         </CardHeader>
                         <CardContent>
                             <div class="mt-1 grid gap-4">
+                                <div class="grid gap-2">
+                                    <Label for="currentPassword">Mật khẩu hiện tại</Label>
+                                    <Input id="currentPassword" type="password" v-model="currentPassword"
+                                        placeholder="Nhập mật khẩu hiện tại" />
+                                </div>
                                 <div class="grid gap-2">
                                     <Label for="password">Mật khẩu mới</Label>
                                     <Input id="password" type="password" v-model="newPassword" autocomplete="password"

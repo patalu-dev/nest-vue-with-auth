@@ -35,6 +35,12 @@ const router = createRouter({
       meta: { requiresAuth: true, title: 'Dashboard' },
     },
     {
+      path: '/change-password',
+      name: 'change-password',
+      component: () => import('@/pages/ChangePassword.vue'),
+      meta: { requiresAuth: true, title: 'Thay đổi mật khẩu' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/pages/NotFound.vue'),

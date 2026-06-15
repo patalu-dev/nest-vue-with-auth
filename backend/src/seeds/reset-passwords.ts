@@ -19,7 +19,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'example_project_nestjs',
   entities: [User, Permission, Role],
-  synchronize: false,
+  synchronize: true,
 });
 
 async function resetPasswords() {

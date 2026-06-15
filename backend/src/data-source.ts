@@ -24,6 +24,5 @@ export const AppDataSource = new DataSource({
   password: dbPassword,
   database: dbDatabase,
   entities: [User, Role, Permission],
-  migrations: ['src/migrations/*.ts'],
-  synchronize: false,
+  synchronize: true,
 });

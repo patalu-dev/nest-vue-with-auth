@@ -18,7 +18,7 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'nest_vue_with_auth',
   entities: [Permission, Role, User],
-  synchronize: false,
+  synchronize: true,
 });
 
 async function seed() {

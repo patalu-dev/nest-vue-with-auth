@@ -147,7 +147,17 @@ export class AuthService {
     await this.updateRefreshTokenHash(userId, null);
   }
 
-  async changePassword(userId: number, newPassword: string) {
+  async changePassword(userId: number, currentPassword: string, newPassword: string) {
+    const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Mật khẩu hiện tại không chính xác');
+    }
+
     return this.usersService.update(userId, { password: newPassword });
   }
 }
