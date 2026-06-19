@@ -34,7 +34,7 @@ import { useAuth } from '@/composables/useAuth'
 
 const { items: breadcrumbItems } = useBreadcrumb();
 const route = useRoute()
-const { user, resetInactivityTimer, checkInactivity, isSessionExpired, logout, can } = useAuth()
+const { user, resetInactivityTimer, checkInactivity, isSessionExpired, logout, can, inactivityEnabled } = useAuth()
 
 const hasPermission = computed(() => {
   if (!route.meta.requiresAuth) return true
@@ -51,16 +51,13 @@ const handleSessionExpired = () => {
 let interval: any = null
 
 onMounted(() => {
-  // Check inactivity immediately on mount - silent check to avoid illogical alerts on fresh access
-  checkInactivity(true)
-
-  // Check inactivity every minute
-  interval = setInterval(checkInactivity, 60 * 1000)
-
-  // Listen for interaction
-  window.addEventListener('mousemove', resetInactivityTimer)
-  window.addEventListener('keydown', resetInactivityTimer)
-  window.addEventListener('click', resetInactivityTimer)
+  if (inactivityEnabled) {
+    checkInactivity(true)
+    interval = setInterval(checkInactivity, 60 * 1000)
+    window.addEventListener('mousemove', resetInactivityTimer)
+    window.addEventListener('keydown', resetInactivityTimer)
+    window.addEventListener('click', resetInactivityTimer)
+  }
 })
 
 onUnmounted(() => {
@@ -138,7 +135,7 @@ const isAuthPage = computed(() => {
     </SidebarInset>
   </SidebarProvider>
 
-  <AlertDialog :open="isSessionExpired">
+  <AlertDialog v-if="inactivityEnabled" :open="isSessionExpired">
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>Phiên làm việc hết hạn</AlertDialogTitle>

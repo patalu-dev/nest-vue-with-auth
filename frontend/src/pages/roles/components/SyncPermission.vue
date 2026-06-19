@@ -170,9 +170,9 @@ const handleSubmit = async () => {
                                 <input type="checkbox" :value="permission.id" v-model="selectedPermissionIds"
                                     class="mt-1 flex-shrink-0 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="text-[14px] text-gray-900 font-medium leading-tight">{{ permission.name
+                                    <h4 class="text-[14px] text-gray-900">{{ permission.name
                                     }}</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5 font-mono">{{ permission.action }}</p>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">{{ permission.action }}</p>
                                 </div>
                             </label>
                         </div>

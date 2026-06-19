@@ -5,6 +5,7 @@ import { toast } from 'vue-sonner'
 import { XCircle } from 'lucide-vue-next'
 import { user, token, refreshToken, lastActivity, isSessionExpired } from './authState'
 
+const INACTIVITY_ENABLED = import.meta.env.VITE_INACTIVITY_ENABLED !== 'false'
 const INACTIVITY_LIMIT = 30 * 60 * 1000 // 30 minutes
 
 export function useAuth() {
@@ -122,19 +123,18 @@ export function useAuth() {
   }
 
   const resetInactivityTimer = () => {
-    if (isSessionExpired.value) return
+    if (!INACTIVITY_ENABLED || isSessionExpired.value) return
     const now = Date.now()
     lastActivity.value = now
     localStorage.setItem('lastActivity', String(now))
   }
 
   const checkInactivity = (silent = false) => {
-    if (user.value && Date.now() - lastActivity.value > INACTIVITY_LIMIT) {
-      if (silent) {
-        clearAuth()
-      } else {
-        isSessionExpired.value = true
-      }
+    if (!INACTIVITY_ENABLED || !user.value || Date.now() - lastActivity.value <= INACTIVITY_LIMIT) return
+    if (silent) {
+      clearAuth()
+    } else {
+      isSessionExpired.value = true
     }
   }
 
@@ -220,6 +220,7 @@ export function useAuth() {
     checkInactivity,
     resetInactivityTimer,
     isSessionExpired,
-    isAuthenticated: computed(() => !!user.value) // Changed to check user instead of token
+    isAuthenticated: computed(() => !!user.value),
+    inactivityEnabled: INACTIVITY_ENABLED,
   }
 }
