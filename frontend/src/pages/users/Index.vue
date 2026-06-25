@@ -181,13 +181,13 @@ const handleExport = async () => {
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div class="flex items-center gap-4">
                 <h1 class="text-xl font-semibold">Quản lý tài khoản</h1>
-                <div class="flex p-0.5 bg-gray-100 rounded-lg border border-gray-200">
+                <div class="flex p-1 bg-gray-100 rounded-lg border border-gray-200">
                     <button @click="toggleDeleted(false)"
-                        :class="['px-3 py-1 text-xs font-medium rounded-md transition-all', !showDeleted ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
+                        :class="['px-3 py-1 text-sm font-medium rounded-md transition-all', !showDeleted ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
                         Người dùng
                     </button>
                     <button @click="toggleDeleted(true)"
-                        :class="['px-3 py-1 text-xs font-medium rounded-md transition-all', showDeleted ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
+                        :class="['px-3 py-1 text-sm font-medium rounded-md transition-all', showDeleted ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700']">
                         Đã xóa
                     </button>
                 </div>
