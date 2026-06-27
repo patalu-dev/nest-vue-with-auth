@@ -51,7 +51,7 @@ export class User {
   @Column({ type: 'datetime', nullable: true })
   updatedAt: Date;
 
-  @Column({ type: 'datetime', nullable: true })
+  @DeleteDateColumn({ type: 'datetime', nullable: true })
   deletedAt: Date;
 
   @Exclude()
