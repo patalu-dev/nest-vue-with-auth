@@ -8,6 +8,10 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  private get isSecureCookie(): boolean {
+    return process.env.COOKIE_SECURE === 'true';
+  }
+
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute
   @Post('login')
   async login(@Body() body: any, @Res({ passthrough: true }) res: Response) {
@@ -17,14 +21,14 @@ export class AuthController {
     // Set httpOnly cookies
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: this.isSecureCookie, // Set to false for development
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: this.isSecureCookie, // Set to false for development
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -54,14 +58,14 @@ export class AuthController {
     // Update httpOnly cookies
     res.cookie('access_token', tokens.access_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: this.isSecureCookie, // Set to false for development
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refresh_token', tokens.refresh_token, {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: this.isSecureCookie, // Set to false for development
       sameSite: 'lax', // Changed to lax for better compatibility
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
